@@ -100,6 +100,9 @@ def build_data() -> tuple[list[list[date]], dict[str, set[date]]]:
     add_unavailability(unavailable_by_person, "Ole", "2026-08-01", "2026-08-16")
     add_unavailability(unavailable_by_person, "Ole", "2026-08-27", "2026-08-31")
 
+    add_unavailability(unavailable_by_person, "Isaline", "2026-08-12", "2026-08-16")
+    add_unavailability(unavailable_by_person, "Isaline", "2026-08-21", "2026-08-23")
+
     weeks = calendar.Calendar(firstweekday=0).monthdatescalendar(YEAR, MONTH)
 
     return weeks, unavailable_by_person

@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>August 2026 Calendar</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --panel: #ffffff;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --grid: #d2d2d7;
+      --outside: rgba(210, 210, 215, 0.35);
+      --bad: rgba(119, 119, 126, 0.30);
+      --ok-border: #ff9f0a;
+      --perfect-border: #34c759;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1260px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid #e5e5ea;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.1;
+    }
+
+    /* --- LEGEND --- */
+    .legend {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    .swatch-perfect { border: 2.5px solid var(--perfect-border); background: #fff; }
+    .swatch-ok { border: 2.5px solid var(--ok-border); background: #fff; }
+    .swatch-bad { background: var(--bad); border: 1px solid var(--grid); }
+
+    /* --- GRID --- */
+    .weekday-row,
+    .week-row {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .weekday-row {
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
+
+    .weekday {
+      text-align: center;
+      color: #8e8e93;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .week-row {
+      margin-bottom: 8px;
+    }
+
+    .day-cell {
+      min-height: 110px;
+      border: 1px solid var(--grid);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .day-cell.outside {
+      background: var(--outside);
+      color: #a1a1a6;
+    }
+
+    .day-cell.bad {
+      background: var(--bad);
+    }
+
+    .day-cell.ok {
+      border: 2.5px solid var(--ok-border);
+    }
+
+    .day-cell.perfect {
+      border: 2.5px solid var(--perfect-border);
+    }
+
+    .date {
+      font-size: 18px;
+      font-weight: 650;
+    }
+
+    .note {
+      margin-top: 10px;
+      color: #4e4e55;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .note-bad { color: #48484c; }
+    .note-ok { color: #1f7a41; }
+
+    .footer {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .not-tracked {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #e5e5ea;
+    }
+
+    .not-tracked h2 {
+      margin: 0 0 10px 0;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 5px 10px;
+      margin: 0 6px 6px 0;
+      background: #f2f2f7;
+      border: 1px solid #e5e5ea;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6e6e73;
+    }
+
+    .chip-ok {
+      background: #e6f7ec;
+      border-color: #34c759;
+      color: #1f7a41;
+    }
+
+    /* --- SIDE PANEL --- */
+    .people-toggle {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 48px;
+      z-index: 20;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 24px;
+      background: var(--panel);
+      color: var(--text);
+      border: none;
+      border-left: 1px solid #e5e5ea;
+      cursor: pointer;
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.04);
+      transition: right 0.25s ease, background 0.15s ease;
+    }
+
+    .people-toggle:hover {
+      background: #f5f5f7;
+    }
+
+    .people-toggle svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .people-toggle.open {
+      right: 260px;
+      background: #f0f0f2;
+    }
+
+    .people-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 260px;
+      background: #fff;
+      border-left: 1px solid #e5e5ea;
+      box-shadow: -8px 0 30px rgba(0, 0, 0, 0.08);
+      padding: 22px;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      z-index: 15;
+      overflow-y: auto;
+    }
+
+    .people-panel.open {
+      transform: translateX(0);
+    }
+
+    .people-panel h2 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+    }
+
+    .people-panel-sub {
+      margin: 0 0 14px 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .people-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .people-actions button {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #d2d2d7;
+      background: #f5f5f7;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .people-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 7px 2px;
+      border-bottom: 1px solid #f2f2f7;
+      cursor: pointer;
+    }
+
+    .people-list input {
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .priority-details {
+      margin-bottom: 14px;
+      border: 1px solid #e5e5ea;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .priority-details summary {
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      list-style: none;
+    }
+
+    .priority-details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .priority-details summary::before {
+      content: "▸";
+      display: inline-block;
+      margin-right: 6px;
+      color: var(--muted);
+      transition: transform 0.15s ease;
+    }
+
+    .priority-details[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    .priority-chips {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    @media (max-width: 980px) {
+      body { padding: 14px; }
+      .wrap { padding: 14px; }
+      .weekday-row,
+      .week-row {
+        grid-template-columns: repeat(7, minmax(90px, 1fr));
+        gap: 6px;
+      }
+      .day-cell { min-height: 96px; padding: 8px; }
+      .date { font-size: 16px; }
+      .note { font-size: 11px; }
+      .people-panel { width: 82vw; }
+      .people-toggle.open { right: 82vw; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>August 2026</h1>
+
+    <div class="legend">
+      <div class="legend-item"><span class="swatch swatch-perfect"></span>Perfect — everyone available</div>
+      <div class="legend-item"><span class="swatch swatch-ok"></span>OK</div>
+      <div class="legend-item"><span class="swatch swatch-bad"></span>Not good</div>
+    </div>
+
+    <section class="weekday-row">
+      <div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div><div class="weekday">Sun</div>
+    </section>
+
+    <section>
+      <div class="week-row"><div class="day-cell outside"><div class="date">27</div></div><div class="day-cell outside"><div class="date">28</div></div><div class="day-cell outside"><div class="date">29</div></div><div class="day-cell outside"><div class="date">30</div></div><div class="day-cell outside"><div class="date">31</div></div><div class="day-cell bad" data-date="2026-08-01"><div class="date">1</div><div class="note note-bad">Missing: Nina, Ole, Will</div></div><div class="day-cell bad" data-date="2026-08-02"><div class="date">2</div><div class="note note-bad">Missing: Nina, Ole, Will</div></div></div><div class="week-row"><div class="day-cell bad" data-date="2026-08-03"><div class="date">3</div><div class="note note-bad">Missing: Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-04"><div class="date">4</div><div class="note">Missing: Cleo, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-05"><div class="date">5</div><div class="note">Missing: Cleo, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-06"><div class="date">6</div><div class="note">Missing: Cleo, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-07"><div class="date">7</div><div class="note">Missing: Cleo, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-08"><div class="date">8</div><div class="note">Missing: Cleo, Minh, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-09"><div class="date">9</div><div class="note">Missing: Cleo, Minh, Nina, Ole, Will</div></div></div><div class="week-row"><div class="day-cell ok" data-date="2026-08-10"><div class="date">10</div><div class="note">Missing: Minh, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-11"><div class="date">11</div><div class="note">Missing: Minh, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-12"><div class="date">12</div><div class="note">Missing: Minh, Nina, Ole, Will</div></div><div class="day-cell ok" data-date="2026-08-13"><div class="date">13</div><div class="note">Missing: Eylul, Minh, Nina, Ole</div></div><div class="day-cell bad" data-date="2026-08-14"><div class="date">14</div><div class="note note-bad">Missing: Alessandra, Cleo, Eylul, Minh, Nina, Ole</div></div><div class="day-cell bad" data-date="2026-08-15"><div class="date">15</div><div class="note note-bad">Missing: Alessandra, Cleo, Eylul, Minh, Nina, Ole, Vicky</div></div><div class="day-cell bad" data-date="2026-08-16"><div class="date">16</div><div class="note note-bad">Missing: Alessandra, Cleo, Eylul, Minh, Nina, Ole, Vicky</div></div></div><div class="week-row"><div class="day-cell bad" data-date="2026-08-17"><div class="date">17</div><div class="note note-bad">Missing: Alessandra, Beyza, Eylul, Minh, Nina, Vicky</div></div><div class="day-cell bad" data-date="2026-08-18"><div class="date">18</div><div class="note note-bad">Missing: Beyza, Eylul, Minh, Nina, Vicky</div></div><div class="day-cell bad" data-date="2026-08-19"><div class="date">19</div><div class="note note-bad">Missing: Alessandra, Beyza, Eylul, Minh, Nina, Vicky</div></div><div class="day-cell bad" data-date="2026-08-20"><div class="date">20</div><div class="note note-bad">Missing: Alessandra, Beyza, Eylul, Joel, Minh, Nina</div></div><div class="day-cell bad" data-date="2026-08-21"><div class="date">21</div><div class="note note-bad">Missing: Alessandra, Cleo, Eylul, Joel, Minh, Nina</div></div><div class="day-cell bad" data-date="2026-08-22"><div class="date">22</div><div class="note note-bad">Missing: Alessandra, Cleo, Eylul, Joel, Minh, Nina</div></div><div class="day-cell bad" data-date="2026-08-23"><div class="date">23</div><div class="note note-bad">Missing: Alessandra, Amzu, Cleo, Eylul, Joel, Minh, Nina</div></div></div><div class="week-row"><div class="day-cell bad" data-date="2026-08-24"><div class="date">24</div><div class="note note-bad">Missing: Alessandra, Amzu, Eylul, Joel, Nina</div></div><div class="day-cell ok" data-date="2026-08-25"><div class="date">25</div><div class="note">Missing: Amzu, Eylul, Joel, Nina</div></div><div class="day-cell ok" data-date="2026-08-26"><div class="date">26</div><div class="note">Missing: Amzu, Eylul, Joel, Nina</div></div><div class="day-cell bad" data-date="2026-08-27"><div class="date">27</div><div class="note note-bad">Missing: Amzu, Eylul, Joel, Mustafa, Ole</div></div><div class="day-cell bad" data-date="2026-08-28"><div class="date">28</div><div class="note note-bad">Missing: Amzu, Eylul, Joel, Mustafa, Ole</div></div><div class="day-cell bad" data-date="2026-08-29"><div class="date">29</div><div class="note note-bad">Missing: Amzu, Eylul, Joel, Mustafa, Ole</div></div><div class="day-cell bad" data-date="2026-08-30"><div class="date">30</div><div class="note note-bad">Missing: Amzu, Eylul, Joel, Mikolaj, Mustafa, Ole, Will</div></div></div><div class="week-row"><div class="day-cell bad" data-date="2026-08-31"><div class="date">31</div><div class="note note-bad">Missing: Amzu, Eylul, Gaia, Joel, Mikolaj, Mustafa, Ole, Will</div></div><div class="day-cell outside"><div class="date">1</div></div><div class="day-cell outside"><div class="date">2</div></div><div class="day-cell outside"><div class="date">3</div></div><div class="day-cell outside"><div class="date">4</div></div><div class="day-cell outside"><div class="date">5</div></div><div class="day-cell outside"><div class="date">6</div></div></div>
+    </section>
+
+    <div class="footer">Tracked people: Alessandra, Amzu, Beyza, Cleo, Eylul, Gaia, Joel, Mikolaj, Minh, Mustafa, Nina, Ole, Vicky, Will</div>
+
+    <div class="not-tracked">
+      <h2>Not yet responded</h2>
+      <span class="chip">Adam</span><span class="chip">Alicja</span><span class="chip">Bartu</span><span class="chip">Chloe</span><span class="chip">Isaline</span><span class="chip">Ivana</span><span class="chip">Lara</span><span class="chip">Nishi</span><span class="chip">Owen</span><span class="chip">Shania</span><span class="chip">Theodora</span>
+    </div>
+  </main>
+
+  <button id="people-toggle" class="people-toggle" type="button" aria-label="Toggle people list">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2.5" y="3.5" width="15" height="13" rx="3" stroke="currentColor" stroke-width="1.4"/>
+      <line x1="12.5" y1="3.5" x2="12.5" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+    </svg>
+  </button>
+  <aside id="people-panel" class="people-panel">
+    <h2>People</h2>
+    <p class="people-panel-sub">Untick someone to see how the calendar looks without them.</p>
+
+    <details class="priority-details">
+      <summary>Priority people</summary>
+      <div class="priority-chips"><span class="chip">Bartu</span><span class="chip">Chloe</span><span class="chip">Eylul</span><span class="chip">Gaia</span><span class="chip">Lara</span><span class="chip">Nishi</span></div>
+    </details>
+
+    <div class="people-actions">
+      <button type="button" id="select-all">Select all</button>
+      <button type="button" id="select-none">Select none</button>
+    </div>
+    <div id="people-list" class="people-list">
+      <label><input type="checkbox" value="Adam" checked> Adam</label><label><input type="checkbox" value="Alessandra" checked> Alessandra</label><label><input type="checkbox" value="Alicja" checked> Alicja</label><label><input type="checkbox" value="Amzu" checked> Amzu</label><label><input type="checkbox" value="Bartu" checked> Bartu</label><label><input type="checkbox" value="Beyza" checked> Beyza</label><label><input type="checkbox" value="Chloe" checked> Chloe</label><label><input type="checkbox" value="Cleo" checked> Cleo</label><label><input type="checkbox" value="Eylul" checked> Eylul</label><label><input type="checkbox" value="Gaia" checked> Gaia</label><label><input type="checkbox" value="Isaline" checked> Isaline</label><label><input type="checkbox" value="Ivana" checked> Ivana</label><label><input type="checkbox" value="Joel" checked> Joel</label><label><input type="checkbox" value="Lara" checked> Lara</label><label><input type="checkbox" value="Mikolaj" checked> Mikolaj</label><label><input type="checkbox" value="Minh" checked> Minh</label><label><input type="checkbox" value="Mustafa" checked> Mustafa</label><label><input type="checkbox" value="Nina" checked> Nina</label><label><input type="checkbox" value="Nishi" checked> Nishi</label><label><input type="checkbox" value="Ole" checked> Ole</label><label><input type="checkbox" value="Owen" checked> Owen</label><label><input type="checkbox" value="Shania" checked> Shania</label><label><input type="checkbox" value="Theodora" checked> Theodora</label><label><input type="checkbox" value="Vicky" checked> Vicky</label><label><input type="checkbox" value="Will" checked> Will</label>
+    </div>
+  </aside>
+
+  <script id="calendar-data" type="application/json">{"people": {"Gaia": ["2026-08-31"], "Joel": ["2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23", "2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31"], "Vicky": ["2026-08-15", "2026-08-16", "2026-08-17", "2026-08-18", "2026-08-19"], "Alessandra": ["2026-08-14", "2026-08-15", "2026-08-16", "2026-08-17", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23", "2026-08-24"], "Beyza": ["2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20"], "Cleo": ["2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-14", "2026-08-15", "2026-08-16", "2026-08-21", "2026-08-22", "2026-08-23"], "Amzu": ["2026-08-23", "2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31"], "Eylul": ["2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16", "2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23", "2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31"], "Minh": ["2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16", "2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23"], "Mikolaj": ["2026-08-30", "2026-08-31"], "Will": ["2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-30", "2026-08-31"], "Nina": ["2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16", "2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23", "2026-08-24", "2026-08-25", "2026-08-26"], "Mustafa": ["2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31"], "Ole": ["2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31"]}, "keyPeople": ["Bartu", "Chloe", "Eylul", "Gaia", "Lara", "Nishi"], "allMembers": ["Gaia", "Joel", "Adam", "Alessandra", "Beyza", "Chloe", "Cleo", "Eylul", "Ivana", "Minh", "Nina", "Owen", "Theodora", "Vicky", "Will", "Alicja", "Amzu", "Bartu", "Isaline", "Lara", "Mustafa", "Nishi", "Ole", "Shania", "Mikolaj"], "pastDates": ["2026-08-01", "2026-08-02", "2026-08-03"], "maxMissingForOk": 4}</script>
+  <script>
+    const DATA = JSON.parse(document.getElementById('calendar-data').textContent);
+    const selected = new Set(DATA.allMembers);
+
+    function computeStatus(dateStr) {
+      const unavailable = [];
+      for (const person in DATA.people) {
+        if (selected.has(person) && DATA.people[person].includes(dateStr)) {
+          unavailable.push(person);
+        }
+      }
+      unavailable.sort();
+      const keyMissing = unavailable.filter(p => DATA.keyPeople.includes(p));
+      if (DATA.pastDates.includes(dateStr)) {
+        return { status: 'bad', unavailable };
+      }
+      if (keyMissing.length > 0 && unavailable.length > DATA.maxMissingForOk) {
+        return { status: 'bad', unavailable };
+      }
+      if (unavailable.length > 0) return { status: 'ok', unavailable };
+      return { status: 'perfect', unavailable: [] };
+    }
+
+    function updateCalendar() {
+      document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
+        const dateStr = cell.dataset.date;
+        const { status, unavailable } = computeStatus(dateStr);
+
+        cell.classList.remove('perfect', 'ok', 'bad');
+        cell.classList.add(status);
+
+        const noteEl = cell.querySelector('.note');
+        if (!noteEl) return;
+
+        noteEl.classList.remove('note-ok', 'note-bad');
+        if (status === 'perfect') {
+          noteEl.textContent = 'Everyone available';
+          noteEl.classList.add('note-ok');
+        } else {
+          noteEl.textContent = unavailable.length > 0 ? ('Missing: ' + unavailable.join(', ')) : 'Not good';
+          if (status === 'bad') noteEl.classList.add('note-bad');
+        }
+      });
+    }
+
+    const toggleBtn = document.getElementById('people-toggle');
+    const panel = document.getElementById('people-panel');
+    toggleBtn.addEventListener('click', () => {
+      const isOpen = panel.classList.toggle('open');
+      toggleBtn.classList.toggle('open', isOpen);
+    });
+
+    document.querySelectorAll('#people-list input[type="checkbox"]').forEach(box => {
+      box.addEventListener('change', () => {
+        if (box.checked) {
+          selected.add(box.value);
+        } else {
+          selected.delete(box.value);
+        }
+        updateCalendar();
+      });
+    });
+
+    document.getElementById('select-all').addEventListener('click', () => {
+      document.querySelectorAll('#people-list input[type="checkbox"]').forEach(box => {
+        box.checked = true;
+        selected.add(box.value);
+      });
+      updateCalendar();
+    });
+
+    document.getElementById('select-none').addEventListener('click', () => {
+      document.querySelectorAll('#people-list input[type="checkbox"]').forEach(box => {
+        box.checked = false;
+        selected.delete(box.value);
+      });
+      updateCalendar();
+    });
+  </script>
+</body>
+</html>

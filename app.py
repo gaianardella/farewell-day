@@ -71,6 +71,7 @@ def build_data() -> tuple[list[list[date]], dict[str, set[date]]]:
     # Vicky already gave her availability in an earlier message and it wasn't
     # repeated in the latest update: kept as-is.
     add_unavailability(unavailable_by_person, "Vicky", "2026-08-15", "2026-08-19")
+    add_unavailability(unavailable_by_person, "Vicky", "2026-08-03", "2026-08-14")
 
     # Alessandra is unavailable from the 14th to the 25th, but is free in the
     # evening of the 18th and the 25th: for a dinner we count those as free.
@@ -102,6 +103,11 @@ def build_data() -> tuple[list[list[date]], dict[str, set[date]]]:
 
     add_unavailability(unavailable_by_person, "Isaline", "2026-08-12", "2026-08-16")
     add_unavailability(unavailable_by_person, "Isaline", "2026-08-21", "2026-08-23")
+
+    # Nina (1-26) and Ole (1-16) already cover the 3rd-14th, no change needed
+    # for them. Ivana and Lara are new.
+    add_unavailability(unavailable_by_person, "Ivana", "2026-08-03", "2026-08-14")
+    add_unavailability(unavailable_by_person, "Lara", "2026-08-03", "2026-08-14")
 
     weeks = calendar.Calendar(firstweekday=0).monthdatescalendar(YEAR, MONTH)
 

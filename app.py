@@ -17,8 +17,8 @@ WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 ALL_MEMBERS = [
     "Gaia", "Joel", "Adam", "Alessandra", "Beyza", "Chloe", "Cleo", "Eylul",
     "Ivana", "Minh", "Nina", "Owen", "Theodora", "Vicky", "Will", "Alicja",
-    "Amzu", "Bartu", "Isaline", "Lara", "Mustafa", "Nishi", "Ole", "Shania",
-    "Mikolaj",
+    "Amzu", "Bartu", "Isaline", "Lara", "Laura", "Mustafa", "Nishi", "Ole",
+    "Shania", "Mikolaj",
 ]
 
 # People without whom dinner can't happen at all: if even one of these is
@@ -32,7 +32,7 @@ KEY_PEOPLE = {"Gaia", "Eylul", "Chloe", "Bartu", "Lara", "Nishi"}
 MAX_MISSING_FOR_OK = 4
 
 # Days that have already gone by: no point planning a dinner on these.
-PAST_DAYS = {1, 2, 3}
+PAST_DAYS = {1, 2, 3, 4}
 
 
 def is_past(day: date) -> bool:
@@ -105,9 +105,9 @@ def build_data() -> tuple[list[list[date]], dict[str, set[date]]]:
     add_unavailability(unavailable_by_person, "Isaline", "2026-08-21", "2026-08-23")
 
     # Nina (1-26) and Ole (1-16) already cover the 3rd-14th, no change needed
-    # for them. Ivana and Lara are new.
+    # for them. Ivana and Laura are new.
     add_unavailability(unavailable_by_person, "Ivana", "2026-08-03", "2026-08-14")
-    add_unavailability(unavailable_by_person, "Lara", "2026-08-03", "2026-08-14")
+    add_unavailability(unavailable_by_person, "Laura", "2026-08-03", "2026-08-14")
 
     weeks = calendar.Calendar(firstweekday=0).monthdatescalendar(YEAR, MONTH)
 

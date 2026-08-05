@@ -109,6 +109,17 @@ def build_data() -> tuple[list[list[date]], dict[str, set[date]]]:
     add_unavailability(unavailable_by_person, "Ivana", "2026-08-03", "2026-08-14")
     add_unavailability(unavailable_by_person, "Laura", "2026-08-03", "2026-08-14")
 
+    add_unavailability(unavailable_by_person, "Bartu", "2026-08-17", "2026-08-24")
+
+    add_unavailability(unavailable_by_person, "Nishi", "2026-08-29", "2026-08-31")
+
+    # Lara is only available Mon-Thu of the week of the 17th and the week of
+    # the 24th (not Fridays, not weekends): mark the whole month unavailable,
+    # then free up just those 8 days.
+    add_unavailability(unavailable_by_person, "Lara", "2026-08-01", "2026-08-31")
+    for lara_free_day in (17, 18, 19, 20, 24, 25, 26, 27):
+        unavailable_by_person["Lara"].discard(date(2026, 8, lara_free_day))
+
     weeks = calendar.Calendar(firstweekday=0).monthdatescalendar(YEAR, MONTH)
 
     return weeks, unavailable_by_person

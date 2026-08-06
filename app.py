@@ -120,6 +120,10 @@ def build_data() -> tuple[list[list[date]], dict[str, set[date]]]:
     for lara_free_day in (17, 18, 19, 20, 24, 25, 26, 27):
         unavailable_by_person["Lara"].discard(date(2026, 8, lara_free_day))
 
+    # Chloe has her thesis submission on the 11th at 16h; she's free that
+    # same evening, so the 11th itself counts as available for dinner.
+    add_unavailability(unavailable_by_person, "Chloe", "2026-08-01", "2026-08-10")
+
     weeks = calendar.Calendar(firstweekday=0).monthdatescalendar(YEAR, MONTH)
 
     return weeks, unavailable_by_person
